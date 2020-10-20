@@ -2,3 +2,5 @@
 Community/local_settings.py
 
 Community/secrets.py
+
+Community/__pycache__/
