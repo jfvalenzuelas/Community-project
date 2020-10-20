@@ -1,0 +1,30 @@
+{% extends 'market/base.html' %}
+{% block content %}
+    <h1>Market</h1>
+    <div>
+        <form method="GET" action="{% url 'new_post' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success"id="new-post-button" name="new-post-button">New Post</button>
+        </form>
+    </div>
+    <ul>
+        {% if market_posts %}
+                {% for market_post in market_posts %}
+                    <div class="media">
+                        <div class="media-left media-middle">
+                            <a href="{% url 'view_post' market_post.id %}">
+                                <img class="media-object" src="..." alt="...">
+                            </a>
+                        </div>
+                        <div class="media-body">
+                            <h4 class="media-heading">{{ market_post.title }}</h4>
+                            <p>{{ market_post.description }}</p>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <span>There are not posts</span>
+        {% endif %}
+    </ul>
+{% endblock %}

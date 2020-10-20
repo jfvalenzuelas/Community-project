@@ -1,0 +1,30 @@
+{% extends 'market/base.html' %}
+{% block content %}
+    <div class="container-fluid">
+        <h1>View Post</h1>
+
+        <div class="row">
+            <div class="col-12">
+                <span>{{ market_post.title }}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <span>{{ market_product.name }}</span>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <span>{{ market_product.description }}</span>
+            </div>
+        </div>
+        <form action="{% url 'delete_post' market_post.id %}" method="POST">
+            {% csrf_token %}
+            <div class="form-row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>   
+{% endblock %}
