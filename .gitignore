@@ -4,3 +4,11 @@ Community/local_settings.py
 Community/secrets.py
 
 Community/__pycache__/
+
+*.sqlite3
+
+market/__pycache__/
+
+market/migrations/
+
+media/images/

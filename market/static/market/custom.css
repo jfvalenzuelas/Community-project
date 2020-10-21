@@ -4,12 +4,13 @@
     --raisin-black: #231F20;
     --green-munsell: #06A77D;
     --ghost-white: #EDEDF4;
+    --pure-white: #FFFFFF;
 }
 
 body {
     font-family: 'Montserrat', sans-serif;
     color: var(--raisin-black);
-    background-color: var(--ghost-white);
+    background-color: var(--pure-white);
 }
 
 /*-->Navbar custom css*/
@@ -20,7 +21,7 @@ body {
 /* change the brand and text color */
 .navbar-custom .navbar-brand,
 .navbar-custom .navbar-text {
-    color: var(--ghost-white);
+    color: var(--pure-white);
 }
 
 /* change the link color */
@@ -36,7 +37,7 @@ body {
 
 /* for dropdown only - change the color of droodown */
 .navbar-custom .dropdown-menu {
-    background-color: var(--ghost-white);
+    background-color: var(--pure-white);
 }
 
 .navbar-custom .dropdown-item {
@@ -45,7 +46,7 @@ body {
 
 .navbar-custom .dropdown-item:hover,
 .navbar-custom .dropdown-item:focus {
-    color: var(--ghost-white);
+    color: var(--pure-white);
     background-color: var(--green-munsell);
 }
 /*Navbar custom css <---*/

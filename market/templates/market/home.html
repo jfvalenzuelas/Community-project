@@ -8,23 +8,23 @@
         </form>
     </div>
     <ul>
-        {% if market_posts %}
-                {% for market_post in market_posts %}
+        {% if products %}
+                {% for product in products %}
                     <div class="media">
                         <div class="media-left media-middle">
-                            <a href="{% url 'view_post' market_post.id %}">
+                            <a href="{% url 'view_post' product.id %}">
                                 <img class="media-object" src="..." alt="...">
                             </a>
                         </div>
                         <div class="media-body">
-                            <h4 class="media-heading">{{ market_post.title }}</h4>
-                            <p>{{ market_post.description }}</p>
+                            <h4 class="media-heading">{{ product.title }}</h4>
+                            <p>{{ product.description }}</p>
                         </div>
                     </div>
                 {% endfor %}
             </div>
         {% else %}
-            <span>There are not posts</span>
+            <span>There are not products</span>
         {% endif %}
     </ul>
 {% endblock %}

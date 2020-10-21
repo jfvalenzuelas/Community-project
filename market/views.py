@@ -1,57 +1,60 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import MarketPost, ImageAlbum, Image, MarketProduct, MarketCategory
+from .models import Product, Image, Category
 
-from .forms import MarketPostForm
+from .forms import ProductForm
 
 # Create your views here.
 def home(request):
-    market_posts = MarketPost.objects.filter(product__sold=False)
+    products = Product.objects.filter(sold=False)
 
-    return render(request, 'market/home.html', {'market_posts':market_posts})
+    return render(request, 'market/home.html', {'products':products})
 
 def new_post(request):
     if request.method == 'POST':
          # create a form instance and populate it with data from the request:
-        form = MarketPostForm(request.POST)
+        form = ProductForm(request.POST)
 
         if form.is_valid():
-            print(form['category'].data)
-            # Create a new Image Album
-            album = ImageAlbum()
-            album.save()
-
             # Get selected Category
-            category = MarketCategory.objects.get(title=form['category'].data.capitalize())
+            category = Category.objects.get(title=form['category'].data.capitalize())
 
             # Create a new Market Product
-            market_product = MarketProduct(name=form['name'].data, description=form['description'].data, price=form['price'].data, album=album, category=category)
-            market_product.save()
+            product = Product(title=form['title'].data, description=form['description'].data, price=form['price'].data, category=category)
+            product.save()
 
-            # Create a new Market Post
-            market_post = MarketPost(title=form['title'].data, product=market_product)
-            market_post.save()
+            length = request.POST.get('length')
+
+            for file_num in range(0, int(length)):
+                Image.objects.create(
+                    product = product,
+                    image = request.FILES.get(f'image{file_num}')
+                )
 
             return redirect('home')
         else:
-            return render(request, 'market/new-post.html', {'form':form})
+            return render(request, 'market/new-post.html', {
+                'form':form
+            })
     else:
-        form = MarketPostForm()
+        form = ProductForm()
 
         return render(request, 'market/new-post.html', {'form':form})
 
-def view_post(request, post_pk):
-    market_post = get_object_or_404(MarketPost, pk=post_pk)
-    market_product = get_object_or_404(MarketProduct, pk=market_post.product)
-    product_category = get_object_or_404(MarketCategory, pk=market_product.category.id)
+def view_post(request, product_pk):
+    product = get_object_or_404(Product, pk=product_pk)
+    product_category = get_object_or_404(Category, pk=product.category.id)
+    photos = Image.objects.filter(product=product)
 
-    return render(request, 'market/view-post.html', {'market_post':market_post, 'market_product':market_product, 'product_category':product_category})
+    return render(request, 'market/view-post.html', {
+        'product':product, 
+        'product_category':product_category,
+        'photos': photos
+    })
 
-def delete_post(request, post_pk):
-    market_post = get_object_or_404(MarketPost, pk=post_pk)
-    market_product = get_object_or_404(MarketProduct, pk=market_post.id)
-    product_album = get_object_or_404(ImageAlbum, pk=market_product.album.id)
+def delete_post(request, product_pk):
+    product = get_object_or_404(Product, pk=product_pk)
 
     if request.method == 'POST':
-        product_album.delete()
+        product.delete()
 
         return redirect('home')
