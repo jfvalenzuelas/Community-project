@@ -1,30 +1,42 @@
 {% extends 'market/base.html' %}
 {% block content %}
-    <h1>Market</h1>
-    <div>
-        <form method="GET" action="{% url 'new_post' %}">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-success"id="new-post-button" name="new-post-button">New Post</button>
-        </form>
+    <div class="row mt-5">
+        <div class="col-12">
+            <h1>Market</h1>
+        </div>
     </div>
-    <ul>
-        {% if products %}
-                {% for product in products %}
-                    <div class="media">
-                        <div class="media-left media-middle">
-                            <a href="{% url 'view_post' product.id %}">
-                                <img class="media-object" src="..." alt="...">
-                            </a>
+    <div class="row">
+        <div class="col-12">
+            <form method="GET" action="{% url 'new_post' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-success"id="new-post-button" name="new-post-button">New Post</button>
+            </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <ul>
+                {% if products_list %}
+                    <hr>
+                    {% for product_data in products_list %}
+                        <div class="media">
+                            <div class="media-left media-middle">
+                                <a href="{% url 'view_post' product_data.product.id %}">
+                                    <img class="media-object" src="{{ product_data.thumbnail.image.url}}" alt="" width="200" height="200">
+                                </a>
+                            </div>
+                            <div class="media-body ml-5">
+                                <h4 class="media-heading">{{ product_data.product.title }}</h4>
+                                <h5>${{ product_data.product.price }}</h5>
+                                <p>{{ product_data.product.description }}</p>
+                            </div>
                         </div>
-                        <div class="media-body">
-                            <h4 class="media-heading">{{ product.title }}</h4>
-                            <p>{{ product.description }}</p>
-                        </div>
-                    </div>
-                {% endfor %}
-            </div>
-        {% else %}
-            <span>There are not products</span>
-        {% endif %}
-    </ul>
+                        <hr>
+                    {% endfor %}
+                {% else %}
+                    <span>There is nothing currently on sale :(</span>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
 {% endblock %}

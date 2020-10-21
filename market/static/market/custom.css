@@ -13,6 +13,9 @@ body {
     background-color: var(--pure-white);
 }
 
+hr {
+    color: var(--raisin-black);
+}
 /*-->Navbar custom css*/
 .navbar-custom {
     background-color: var(--green-munsell);

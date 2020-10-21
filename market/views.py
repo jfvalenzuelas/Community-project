@@ -5,9 +5,17 @@ from .forms import ProductForm
 
 # Create your views here.
 def home(request):
+    products_list = []
     products = Product.objects.filter(sold=False)
+    for product in products:
+        thumbnail = Image.objects.filter(product=product)[0]
+        product_data = {
+            "product": product,
+            "thumbnail": thumbnail
+        }
+        products_list.append(product_data)
 
-    return render(request, 'market/home.html', {'products':products})
+    return render(request, 'market/home.html', {'products_list':products_list})
 
 def new_post(request):
     if request.method == 'POST':
