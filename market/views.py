@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Image, Category
-
 from .forms import ProductForm
+from django.contrib.auth import login, logout, authenticate
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 def home(request):
@@ -17,6 +18,7 @@ def home(request):
 
     return render(request, 'market/home.html', {'products_list':products_list})
 
+@login_required
 def new_post(request):
     if request.method == 'POST':
          # create a form instance and populate it with data from the request:

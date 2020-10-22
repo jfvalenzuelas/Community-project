@@ -12,3 +12,7 @@ market/__pycache__/
 market/migrations/
 
 media/images/
+
+community_main/__pycache__/
+
+community_main/migrations/
