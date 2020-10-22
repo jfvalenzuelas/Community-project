@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'community_main',
     'market',
+    'django_cleanup.apps.CleanupConfig', # This app needs to be at the bottom of the array
 ]
 
 MIDDLEWARE = [
