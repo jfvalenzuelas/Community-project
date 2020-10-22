@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Product, Image, Category
+from django.contrib.auth.models import User
 from .forms import ProductForm
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -29,7 +30,7 @@ def new_post(request):
             category = Category.objects.get(title=form['category'].data.capitalize())
 
             # Create a new Market Product
-            product = Product(title=form['title'].data, description=form['description'].data, price=form['price'].data, category=category)
+            product = Product(title=form['title'].data, description=form['description'].data, price=form['price'].data, category=category, created_by=request.user)
             product.save()
 
             length = request.POST.get('length')
@@ -40,7 +41,7 @@ def new_post(request):
                     image = request.FILES.get(f'image{file_num}')
                 )
 
-            return redirect('home')
+            return redirect('market_home')
         else:
             return render(request, 'market/new-post.html', {
                 'form':form
@@ -53,7 +54,7 @@ def new_post(request):
 def view_post(request, product_pk):
     product = get_object_or_404(Product, pk=product_pk)
     product_category = get_object_or_404(Category, pk=product.category.id)
-    photos = Image.objects.filter(product=product)
+    photos = Image.objects.filter(product=product).order_by('id')
 
     return render(request, 'market/view-post.html', {
         'product':product, 
@@ -67,4 +68,4 @@ def delete_post(request, product_pk):
     if request.method == 'POST':
         product.delete()
 
-        return redirect('home')
+        return redirect('market_home')
