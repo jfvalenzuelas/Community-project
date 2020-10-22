@@ -24,49 +24,45 @@
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-custom">
-        <div class="container">
-            <a class="navbar-brand" href="{% url 'home' %}">
-              <img src="{% static 'market/community-logo.png' %}" width="60" height="50" class="d-inline-block align-top">
-            </a>
-            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-              <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-              {% if user.is_authenticated %}
-                <ul class="navbar-nav mr-auto">
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Current</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Completed</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Create</a>
-                  </li>
-                </ul>
-              {% endif %}
-              <ul class="navbar-nav ml-auto">
-                {% if user.is_authenticated %}
-                  <li class="nav-item">
-                    <form style='display: none;' method="POST" action="#">
-                      {% csrf_token %}
-                      <button id="signOutBtn" type="submit"><a href="#" class="nav-link">Logout</a></button>
-                    </form>
-                  </li>
-                {% else %}
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Sign Up</a>
-                  </li>
-                  <li class="nav-item">
-                    <a class="nav-link" href="#">Login</a>
-                  </li>
-                {% endif %}
-              </ul>
-            </div>
+      <div class="container">
+        <a class="navbar-brand" href="{% url 'community_home' %}">
+          <img src="{% static 'market/community-logo.png' %}" width="60" height="50" class="d-inline-block align-top">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'market_home' %}">Market</a>
+              </li>
+            </ul>
+          <ul class="navbar-nav ml-auto">
+            {% if user.is_authenticated %}
+              <li class="nav-item">
+                <a class="nav-link" href="#">{{ user.username }}</a>
+              </li>
+              <li class="nav-item">
+                <a href="#" onclick="$('#signOutBtn').click()" class="nav-link">Logout</a>
+                <form style='display: none;' method="POST" action="{% url 'logout_user' %}">
+                  {% csrf_token %}
+                  <button id="signOutBtn" type="submit">Logout</button>
+                </form>
+              </li>
+            {% else %}
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'signup_user' %}">Sign Up</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="{% url 'login_user' %}">Login</a>
+              </li>
+            {% endif %}
+          </ul>
         </div>
+      </div>
     </nav>
     <div class="container">
-        {% block content %}{% endblock %}
+      {% block content %}{% endblock %}
     </div>
 
     <!-- Optional JavaScript -->
