@@ -1,4 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
+from django.core import serializers
+from django.urls import reverse
 from .models import Product, Image, Category
 from django.contrib.auth.models import User
 from .forms import ProductForm
@@ -22,12 +25,12 @@ def home(request):
 @login_required
 def new_post(request):
     if request.method == 'POST':
-         # create a form instance and populate it with data from the request:
+         # create a form instance and populate it with data from the request.
         form = ProductForm(request.POST)
 
         if form.is_valid():
             # Get selected Category
-            category = Category.objects.get(title=form['category'].data.capitalize())
+            category = Category.objects.get(pk=form['category'].data)
 
             # Create a new Market Product
             product = Product(title=form['title'].data, description=form['description'].data, price=form['price'].data, category=category, created_by=request.user)
@@ -40,12 +43,14 @@ def new_post(request):
                     product = product,
                     image = request.FILES.get(f'image{file_num}')
                 )
-
-            return redirect('market_home')
+            data = {
+                "message": "Product was published successfully",
+                "redirect": reverse('market_home')
+            }
+            return JsonResponse({'data': data}, status=200)
         else:
-            return render(request, 'market/new-post.html', {
-                'form':form
-            })
+            # some form errors occured.
+            return JsonResponse({'error': form.errors}, status=400)
     else:
         form = ProductForm()
 
@@ -62,10 +67,48 @@ def view_post(request, product_pk):
         'photos': photos
     })
 
+def edit_post(request, product_pk):
+    if request.method == 'GET':
+        # process GET method
+        product = get_object_or_404(Product, pk=product_pk)
+        product_category = get_object_or_404(Category, pk=product.category.id)
+        photos = Image.objects.filter(product=product).order_by('id')
+
+        formContext = {
+            'title': product.title,
+            'description': product.description,
+            'price': product.price,
+            'category': product.category
+        }
+
+        form = ProductForm(formContext)
+
+        return render(request, 'market/edit-post.html', {
+            'form': form,
+            'product': product
+        })
+
+    else:
+        # process POST method
+        product = get_object_or_404(Product, pk=product_pk)
+        form = ProductForm(request.POST or None, instance=product)
+
+        if form.is_valid():
+            form.save()
+
+            data = {
+                "message": "Product was edited successfully",
+                "redirect": reverse('community_profile')
+            }
+            return JsonResponse({'data': data}, status=200)
+        else:
+            # some form errors occured.
+            return JsonResponse({'error': form.errors}, status=400)
+
 def delete_post(request, product_pk):
     product = get_object_or_404(Product, pk=product_pk)
 
     if request.method == 'POST':
         product.delete()
 
-        return redirect('market_home')
+        return redirect('community_profile')
