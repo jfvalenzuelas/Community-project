@@ -1,23 +1,42 @@
 from django import forms
-from .models import Category
+from .models import Product
 from django.utils.translation import gettext as _
 
-class ProductForm(forms.Form):
-    title = forms.CharField(label=_('Title'), help_text='Give your Post a Title.', error_messages={'required': 'Please give your Post a Title.'}, required=True, max_length=255)
-    description = forms.CharField(widget=forms.Textarea, label=_('Description'), help_text='Write a nice description for your product.', error_messages={'required': 'Please give your Product a Description.'}, required=True)
-    price = forms.DecimalField(label=_('Price'), help_text='The right price for your Product.', error_messages={'required': 'Please give your Product a Price.'}, required=True, max_digits=10, decimal_places=2)
-    category = forms.ChoiceField(label=_('Category'), help_text='Give a Category for your Product.', error_messages={'required': 'Please select a Category.'}, required=True)
-
-    def __init__(self, *args, submission=None):
-        super().__init__(*args)
-        self.submission = submission
-
-        # Fill available market categories
-        available_market_categories = Category.objects.exclude(active=False)
-    
-        categories = list(available_market_categories)
-        self.fields['category'].choices = (
-            (category.title.lower(),
-            category.title)
-            for category in categories
+class ProductForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = (
+            'title',
+            'description',
+            'price',
+            'category'
         )
+        
+        labels = {
+            'title': _('Title'),
+            'description': _('Description'),
+            'price': _('Price'),
+            'category': _('Category')
+        }
+
+        help_texts = {
+            'title': _('Enter a title for the product'),
+            'description': _('Enter a description for the product'),
+            'price': _('Enter a price for the product'),
+            'category': _('Select a category for the product'),
+        }
+
+        error_messages = {
+            'title': {
+                'required': _('Please, enter a title for the product') 
+            },
+            'description': {
+                'required': _('Please, enter a description for the product')
+            },
+            'price': {
+                'required': _('Please, enter a price for the product')
+            },
+            'category': {
+                'required': _('Please, select a category for the product')
+            }
+        }

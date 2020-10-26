@@ -34,48 +34,25 @@
         </div>
     {% endfor %}
 </form>
-<div class="row">
-    <div class="col-md-12">
-        <input type="file" multiple/>
-        <small class="form-text text-muted">Upload some Images of your Product.</small>
+<div class="form-row mt-5">
+    <div class="col-10">
+        <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
+        <a href="{% url 'community_profile' %}"><button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button></a>
+    </div>
+    <div class="col-2">
+        <button type="submit" class="btn btn-danger float-right" id="deleteBtn">Delete</button>
     </div>
 </div>
-<div class="form-row mt-5">
-    <div class="col-md-12">
-        <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
-        <a href="{% url 'market_home' %}"><button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button></a>
+<div class="row mt-5">
+    <div class="col-12">
+        <form action="{% url 'delete_post' product.id %}" method="POST">
+            {% csrf_token %}
+        </form>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Once the DOM has loaded, modify the input element of type file with pond.
-        FilePond.registerPlugin(FilePondPluginFileValidateSize);
-        FilePond.registerPlugin(FilePondPluginFileValidateType);
-        FilePond.setOptions({
-            allowMultiple: true,
-            maxFiles: 4,
-            maxFileSize: '3MB'
-        });
-        var files = [];
-        const inputElement = document.querySelector('input[type="file"]');
-        const pond = FilePond.create( inputElement, {
-            acceptedFileTypes: ['image/png', 'image/jpeg'],
-            // onaddfile added as callback function to store images as they are loaded
-            onaddfile: (err, fileItem) => {
-                if (!err) {
-                    files.push(fileItem.file);
-                }
-                console.log(files);
-            },
-            onremovefile: (err, fileItem) => {
-                const index = files.indexOf(fileItem.file);
-                if (index > -1) {
-                    files.splice(index, 1);
-                }
-            }
-        } );
-
         $('input[type="text"]').on('change', function() {
             var label = $("label[for='" + $(this).attr('id') + "']");
 
@@ -124,14 +101,10 @@
             e.preventDefault();
             var productForm = document.querySelector('#product_form');
             var formData = new FormData(productForm);
-            formData.append('length', files.length);
-            for (var i = 0; i < files.length; i++) {
-                formData.append('image' + i, files[i]);
-            }
 
             $.ajax({
                 type: 'POST',
-                url: '{% url "new_post" %}',
+                url: '{% url "edit_post" product.id %}',
                 data: formData,
                 cache: false,
                 processData: false,

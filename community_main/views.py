@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from market.models import Product, Image, Category
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
@@ -60,3 +61,18 @@ def logout_user(request):
     if request.method == 'POST':
         logout(request)
         return redirect('community_home')
+
+@login_required
+def profile(request):
+    if request.method == 'GET':
+        products_list = []
+        products = Product.objects.filter(created_by=request.user)
+        for product in products:
+            thumbnail = Image.objects.filter(product=product)[0]
+            product_data = {
+                "product": product,
+                "thumbnail": thumbnail
+            }
+            products_list.append(product_data)
+
+        return render(request, 'community_main/profile.html', {'user': request.user, 'products_list': products_list})

@@ -1,0 +1,40 @@
+{% extends 'community_main/base.html' %}
+{% block content %}
+<h1>Profile</h1>
+<div class="row mt-3 mb-3">
+    <div class="col-12">
+        {{ user.username }}
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <h2>Published Products</h2>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <ul>
+            {% if products_list %}
+                <hr>
+                {% for product_data in products_list %}
+                    <div class="media">
+                        <div class="media-left media-middle">
+                            <a href="{% url 'edit_post' product_data.product.id %}">
+                                <img class="media-object" src="{{ product_data.thumbnail.image.url}}" alt="" width="200" height="200">
+                            </a>
+                        </div>
+                        <div class="media-body ml-5">
+                            <h4 class="media-heading">{{ product_data.product.title }}</h4>
+                            <h5>${{ product_data.product.price }}</h5>
+                            <p>{{ product_data.product.description }}</p>
+                        </div>
+                    </div>
+                    <hr>
+                {% endfor %}
+            {% else %}
+                <span>You have nothing currently on sale :(</span>
+            {% endif %}
+        </ul>
+    </div>
+</div>
+{% endblock %}
