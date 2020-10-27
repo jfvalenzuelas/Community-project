@@ -17,19 +17,47 @@
             {% if products_list %}
                 <hr>
                 {% for product_data in products_list %}
-                    <div class="media">
-                        <div class="media-left media-middle">
-                            <a href="{% url 'edit_post' product_data.product.id %}">
-                                <img class="media-object" src="{{ product_data.thumbnail.image.url}}" alt="" width="200" height="200">
-                            </a>
+                    <div class="row">
+                        <div class="col-8">    
+                            <div class="media">
+                                <div class="media-left media-middle">
+                                    <a href="{% url 'view_post' product_data.product.id %}">
+                                        <img class="media-object" src="{{ product_data.thumbnail.image.url}}" alt="" width="200" height="200">
+                                    </a>
+                                </div>
+                                <div class="media-body ml-5">
+                                    <h4 class="media-heading">{{ product_data.product.title }}</h4>
+                                    <h5>${{ product_data.product.price }}</h5>
+                                    <p>{{ product_data.product.description }}</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="media-body ml-5">
-                            <h4 class="media-heading">{{ product_data.product.title }}</h4>
-                            <h5>${{ product_data.product.price }}</h5>
-                            <p>{{ product_data.product.description }}</p>
+                        <div class="col-4">
+                            <div class="btn-toolbar float-right" role="toolbar" aria-label="Actions">
+                                {% if product_data.product.sold %}
+                                    <button type="button" class="btn btn-sm btn-secondary mr-1" id="soldBtn" action="{% url 'sold_product' product_data.product.id %}" title="Mark as not sold">
+                                        <span class="oi oi-dollar"></span>
+                                    </button>
+                                {% else %}
+                                    <button type="button" class="btn btn-sm btn-warning mr-1" id="soldBtn" action="{% url 'sold_product' product_data.product.id %}" title="Mark as sold">
+                                        <span class="oi oi-dollar"></span>
+                                    </button>
+                                {% endif %}
+                                <a class="mr-1" href="{% url 'edit_post' product_data.product.id %}">
+                                    <button type="button" class="btn btn-sm btn-success" id="editBtn" title="Edit this product">
+                                        <span class="oi oi-pencil"></span>
+                                    </button>
+                                </a>
+                                <form id="delete_product_form" action="{% url 'delete_post' product_data.product.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-danger" id="deleteBtn" title="Delete this product">
+                                        <span class="oi oi-trash"></span>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+                        <hr>
                     </div>
-                    <hr>
                 {% endfor %}
             {% else %}
                 <span>You have nothing currently on sale :(</span>
@@ -37,4 +65,38 @@
         </ul>
     </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const csrf = $('[name=csrfmiddlewaretoken]');
+
+        $(document).on('click', '#soldBtn', function(e) {
+            e.preventDefault();
+
+            $.ajax({
+                type: 'POST',
+                url: $(this).attr('action'),
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function (response) {                    
+                    if (response.sold) {
+                        $(e.target).attr('title', 'Mark as not sold');                       
+                        $(e.target).removeClass("btn-warning");
+                        $(e.target).addClass("btn-secondary");
+                    } else {
+                        $(e.target).attr('title', 'Mark as sold'); 
+                        $(e.target).removeClass("btn-secondary");
+                        $(e.target).addClass("btn-warning");
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log("error");
+                }
+            });
+        });
+
+    });
+</script>
 {% endblock %}

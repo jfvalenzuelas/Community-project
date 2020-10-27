@@ -8,7 +8,7 @@
 }
 
 body {
-    font-family: 'Montserrat', sans-serif;
+    font-family: 'Montserrat';
     color: var(--raisin-black);
     background-color: var(--pure-white);
 }
@@ -53,3 +53,7 @@ hr {
     background-color: var(--green-munsell);
 }
 /*Navbar custom css <---*/
+
+button > span {
+    pointer-events: none;
+}

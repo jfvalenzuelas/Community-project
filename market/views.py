@@ -112,3 +112,22 @@ def delete_post(request, product_pk):
         product.delete()
 
         return redirect('community_profile')
+
+def sold_product(request, product_pk):
+    if request.method == 'POST':
+        product = get_object_or_404(Product, pk=product_pk)
+        product.sold = not product.sold
+        product.save()
+
+        if (product.sold):
+            data = {
+                "message": "Product marked as sold",
+                "sold": product.sold
+            }
+        else:
+            data = {
+                "message": "Product marked as available",
+                "sold": product.sold
+            }
+
+        return JsonResponse(data, status=200)

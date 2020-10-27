@@ -37,5 +37,6 @@ urlpatterns = [
     path('market/new-post', market_views.new_post, name="new_post"),
     path('market/view-post/<int:product_pk>', market_views.view_post, name="view_post"),
     path('market/edit-post/<int:product_pk>', market_views.edit_post, name="edit_post"),
-    path('market/delete-post/<int:product_pk>', market_views.delete_post, name="delete_post")
+    path('market/delete-post/<int:product_pk>', market_views.delete_post, name="delete_post"),
+    path('market/sold-product/<int:product_pk>', market_views.sold_product, name="sold_product"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
