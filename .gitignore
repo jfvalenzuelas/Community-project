@@ -16,3 +16,7 @@ media/images/
 community_main/__pycache__/
 
 community_main/migrations/
+
+wall/__pycache__/
+
+wall/migrations/
