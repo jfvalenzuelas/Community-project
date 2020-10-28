@@ -4,39 +4,41 @@
     {% csrf_token %}
     {% for field in form %}
         <div class="form-group">
-            <div class="form-row">
-                <div class="col-md-12">
-                    {% if field.field.required %}
-                        {% if not field.data %}
-                            <span class="required text-danger font-weight-bold">* </span>
-                        {% else %}
-                            <span class="required font-weight-bold">* </span>
+            <fieldset {% if product.sold %} disabled="disabled" {% endif %}>
+                <div class="form-row">
+                    <div class="col-md-12">
+                        {% if field.field.required %}
+                            {% if not field.data %}
+                                <span class="required text-danger font-weight-bold">* </span>
+                            {% else %}
+                                <span class="required font-weight-bold">* </span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                    {{ field.label_tag }}
+                        {{ field.label_tag }}
+                    </div>
                 </div>
-            </div>
-            <div class="form-row">
-                <div class="col-md-12">
-                    {% if field.errors %}
-                        {{ field|add_class:"form-control is-invalid" }}
-                        {% for error in field.errors %}
-                            <div class="invalid-feedback">
-                                {{ error }}
-                            </div>
-                        {% endfor %}
-                    {% elif field.help_text %}
-                        {{ field|add_class:"form-control" }}
-                        <small class="form-text text-muted">{{ field.help_text|safe }}</small>
-                    {% endif %}
+                <div class="form-row">
+                    <div class="col-md-12">
+                        {% if field.errors %}
+                            {{ field|add_class:"form-control is-invalid" }}
+                            {% for error in field.errors %}
+                                <div class="invalid-feedback">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+                        {% elif field.help_text %}
+                            {{ field|add_class:"form-control" }}
+                            <small class="form-text text-muted">{{ field.help_text|safe }}</small>
+                        {% endif %}
+                    </div>
                 </div>
-            </div>
+            </fieldset>
         </div>
     {% endfor %}
 </form>
 <div class="form-row mt-5">
     <div class="col-10">
-        <button type="button" class="btn btn-primary" id="saveBtn">Save</button>
+        <button type="button" class="btn btn-primary" id="saveBtn" {% if product.sold %}disabled{% endif %}>Save</button>
         <a href="{% url 'community_profile' %}"><button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button></a>
     </div>
     <div class="col-2">

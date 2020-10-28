@@ -34,15 +34,9 @@
                         </div>
                         <div class="col-4">
                             <div class="btn-toolbar float-right" role="toolbar" aria-label="Actions">
-                                {% if product_data.product.sold %}
-                                    <button type="button" class="btn btn-sm btn-secondary mr-1" id="soldBtn" action="{% url 'sold_product' product_data.product.id %}" title="Mark as not sold">
-                                        <span class="oi oi-dollar"></span>
-                                    </button>
-                                {% else %}
-                                    <button type="button" class="btn btn-sm btn-warning mr-1" id="soldBtn" action="{% url 'sold_product' product_data.product.id %}" title="Mark as sold">
-                                        <span class="oi oi-dollar"></span>
-                                    </button>
-                                {% endif %}
+                                <button type="button" class="btn btn-sm{% if product_data.product.sold %} btn-secondary {% else %} btn-warning {% endif %}mr-1" id="soldBtn" action="{% url 'sold_product' product_data.product.id %}" title="{% if product_data.product.sold %}Mark as not sold{% else %}Mark as sold{% endif %}">
+                                    <span class="oi oi-dollar"></span>
+                                </button>
                                 <a class="mr-1" href="{% url 'edit_post' product_data.product.id %}">
                                     <button type="button" class="btn btn-sm btn-success" id="editBtn" title="Edit this product">
                                         <span class="oi oi-pencil"></span>
