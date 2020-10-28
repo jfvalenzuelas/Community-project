@@ -43,4 +43,5 @@ urlpatterns = [
 
     #Wall
     path('wall/', wall_views.home, name="wall_home"),
+    path('wall/new-post', wall_views.new_post, name="new_wall_post"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

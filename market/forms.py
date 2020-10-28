@@ -5,6 +5,7 @@ from django.utils.translation import gettext as _
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
+        
         fields = (
             'title',
             'description',
