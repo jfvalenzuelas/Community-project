@@ -1,8 +1,81 @@
 {% extends 'community_main/base.html' %}
+{% load widget_tweaks %}
 {% block content %}
     <div class="row mt-5">
         <div class="col-12">
             <h1>Wall</h1>
         </div>
     </div>
+    <div class="row mt-3">
+        <div class="col-12">
+            <form id="new_post_form">
+                {% csrf_token %}
+                {% for field in form %}
+                    {{ field|add_class:"form-control" }}
+                {% endfor %}
+                <div class="btn-toolbar mt-3 float-right" role="toolbar" aria-label="New Post Actions">
+                    <button type="button" class="btn btn-primary btn-sm" id="postItBtn">
+                        Post it!
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="row mt-5">
+        <div class="col-12">
+            {% if posts %}
+                <h2>See what Others are talking about</h2>
+                <br>
+                {% for post in posts %}
+                    <div class="card border-0 shadow mb-4">
+                        <div class="card-body">
+                            <h3>{{ post.created_by }}</h3>
+                            <p>{{ post.text }}</p>
+                        </div>
+                        <div class="card-footer text-muted">
+                            {{ post.whenpublished }}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>The Wall is empty :(</p>
+            {% endif %}
+        </div>
+    </div> 
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            $(document).on('click', '#postItBtn', function(e) {
+                e.preventDefault();
+                var productForm = document.querySelector('#new_post_form');
+                var formData = new FormData(productForm);
+
+                $.ajax({
+                    type: 'POST',
+                    url: '{% url "new_wall_post" %}',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    enctype: 'multipart/form-data',
+                    success: function (response) {
+                        var data = response.data;
+                        //alert(data.message);
+                        window.location.reload();
+                    },
+                    error: function (xhr, errmsg, err) {
+                        var errors = xhr.responseJSON.data.error;
+
+                        Object.keys(errors).forEach(field => {
+                            var fieldElement = $('[name="' + field + '"]');
+                            fieldElement.change();
+                            fieldElement.addClass('is-invalid');
+                            //$(fieldElement.siblings("small")[0]).hide();
+                            fieldElement.after("<small class='form-text text-danger'>" + errors[field] + "</small>");
+                        });
+                    }
+                })
+            })
+        })
+    </script>
 {% endblock %}
