@@ -27,13 +27,13 @@
                 <h2>See what Others are talking about</h2>
                 <br>
                 {% for post in posts %}
-                    <div class="card border-0 shadow mb-4">
+                    <div class="card border-0 shadow mb-4 grow selectable card-post" action="{% url 'view_wall_post' post.id %}">
                         <div class="card-body">
                             <h3>{{ post.created_by }}</h3>
                             <p>{{ post.text }}</p>
                         </div>
                         <div class="card-footer text-muted">
-                            {{ post.whenpublished }}
+                            <small>{{ post.whenpublished }}</small>
                         </div>
                     </div>
                 {% endfor %}
@@ -41,7 +41,10 @@
                 <p>The Wall is empty :(</p>
             {% endif %}
         </div>
-    </div> 
+    </div>
+
+    <div class="modal" id="viewPostModal" tabindex="-1" role="dialog" aria-labelledby="viewPostModal" aria-hidden="true">
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -74,8 +77,27 @@
                             fieldElement.after("<small class='form-text text-danger'>" + errors[field] + "</small>");
                         });
                     }
-                })
-            })
-        })
+                });
+            });
+
+            $(document).on('click', 'div.card-post', function(e) {             
+                $.ajax({
+                    type: 'GET',
+                    url: $(e.target).attr('action'),
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    cache: false,
+                    processData: false,
+                    beforeSend: function() {
+                        $('#viewPostModal').modal('show');
+                    },
+                    success: function(response) {
+                        $('#viewPostModal').html(response);
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(xhr);
+                    }
+                });
+            });
+        });
     </script>
 {% endblock %}
