@@ -67,6 +67,7 @@ def view_post(request, product_pk):
         'photos': photos
     })
 
+@login_required
 def edit_post(request, product_pk):
     if request.method == 'GET':
         # process GET method
@@ -105,6 +106,7 @@ def edit_post(request, product_pk):
             # some form errors occured.
             return JsonResponse({'error': form.errors}, status=400)
 
+@login_required
 def delete_post(request, product_pk):
     product = get_object_or_404(Product, pk=product_pk)
 
@@ -113,6 +115,7 @@ def delete_post(request, product_pk):
 
         return redirect('community_profile')
 
+@login_required
 def sold_product(request, product_pk):
     if request.method == 'POST':
         product = get_object_or_404(Product, pk=product_pk)

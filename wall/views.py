@@ -40,4 +40,22 @@ def new_post(request):
                 "error": form.errors
             }
 
-            return JsonResponse({'data':data}, status=400) 
+            return JsonResponse({'data':data}, status=400)
+
+def view_post(request, post_pk):
+    if request.method == 'GET':
+        post = get_object_or_404(Post, pk=post_pk)
+        
+        context = {
+            'post': post
+        }
+
+        return render(request, 'wall/view-post-modal.html', context)
+
+@login_required
+def delete_post(request, post_pk):
+    if request.method == 'POST':
+        post = get_object_or_404(Post, pk=post_pk)
+        post.delete()
+
+        return redirect('wall_home')
