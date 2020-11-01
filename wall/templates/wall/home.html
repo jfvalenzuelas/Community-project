@@ -27,13 +27,15 @@
                 <h2>See what Others are talking about</h2>
                 <br>
                 {% for post in posts %}
-                    <div class="card border-0 shadow mb-4 grow selectable card-post" action="{% url 'view_wall_post' post.id %}">
+                    <div class="card border-0 shadow mb-4 selectable card-post" action="{% url 'view_wall_post' post.id %}">
                         <div class="card-body">
                             <h3>{{ post.created_by }}</h3>
                             <p>{{ post.text }}</p>
-                        </div>
-                        <div class="card-footer text-muted">
-                            <small>{{ post.whenpublished }}</small>
+                            <button type="button" class="btn btn-like {% if post.id in liked_posts %}liked{% endif %}" action="{% url 'like_wall_post' post.id %}">
+                                <span class="oi oi-heart"></span>
+                                {{ post.likes }}
+                            </button>
+                            <small class="float-right text-muted">{{ post.whenpublished }}</small>
                         </div>
                     </div>
                 {% endfor %}
@@ -80,7 +82,7 @@
                 });
             });
 
-            $(document).on('click', 'div.card-post', function(e) {             
+            $(document).on('click', 'div.card-post', function(e) {    
                 $.ajax({
                     type: 'GET',
                     url: $(e.target).attr('action'),
@@ -97,6 +99,26 @@
                         console.log(xhr);
                     }
                 });
+            });
+
+            $(document).on('click', '.btn-like', function(e) {
+                console.log("like clicked");
+                console.log($(e.target));
+                e.stopPropagation();
+                $.ajax({
+                    type: 'POST',
+                    url: $(e.target).attr('action'),
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    cache: false,
+                    processData: false,
+                    success: function(response) {
+                        $(e.target).toggleClass("liked");
+                        $(e.target).html('<span class="oi oi-heart"></span> ' + response.data.likes);
+                    },
+                    error: function(xhr, errmsg, err) {
+
+                    },
+                })
             });
         });
     </script>
