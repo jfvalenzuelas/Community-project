@@ -1,6 +1,6 @@
 :root {
     --maximum-yellow-red: #FABC3C;
-    --brick-red: #CE4257;
+    --brick-red: #DC3545;
     --raisin-black: #231F20;
     --green-munsell: #06A77D;
     --ghost-white: #EDEDF4;
@@ -62,12 +62,34 @@ div.card-post * {
     pointer-events: none;
 }
 
+div.card-post > * > button {
+    pointer-events: visible;
+}
+
 .grow {
     transition: all .2s ease-in-out;
 }
 
 .grow:hover {
     transform: scale(1.025);
+}
+
+.liked > span {
+    color: var(--brick-red);
+}
+
+.btn-like:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-like {
+    transition: all .2s ease-in-out;
+}
+
+.btn-like:hover {
+    transition: all .2s ease-in-out;
+    transform: scale(1.3);
 }
 
 .selectable {

@@ -10,6 +10,10 @@
             <p>{{ post.text }}</p>
         </div>
         <div class="modal-footer">
+            <button type="button" class="btn btn-like {% if liked_post %}liked{% endif %} mr-auto" action="{% url 'like_wall_post' post.id %}">
+                <span class="oi oi-heart"></span>
+                {{ post.likes }}
+            </button>
             <small>{{ post.whenpublished }}</small>
             {% if post.created_by == request.user %}
                 <div class="dropdown">
@@ -24,7 +28,6 @@
                     </div>
                 </div>
             {% endif %}
-            <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Close</button>
         </div>
     </div>
 </div>
