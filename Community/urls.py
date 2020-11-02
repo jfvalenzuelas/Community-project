@@ -47,4 +47,6 @@ urlpatterns = [
     path('wall/view-post/<int:post_pk>', wall_views.view_post, name="view_wall_post"),
     path('wall/edit-post/<int:post_pk>', wall_views.delete_post, name="delete_wall_post"),
     path('wall/like-post/<int:post_pk>', wall_views.like_post, name="like_wall_post"),
+    path('wall/new-comment/<int:post_pk>', wall_views.new_comment, name="new_wall_comment"),
+    path('wall/post/<int:post_pk>/comments', wall_views.get_post_comments, name="get_wall_post_comments"),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

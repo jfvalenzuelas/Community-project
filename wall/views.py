@@ -2,8 +2,8 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
-from .models import Post, UserPostLike
-from .forms import PostForm
+from .models import Post, UserPostLike, Comment
+from .forms import PostForm, CommentForm
 
 # Create your views here.
 def home(request):
@@ -12,8 +12,6 @@ def home(request):
         posts = Post.objects.all().order_by('-created_at')
         user_post_like = UserPostLike.objects.filter(user=request.user)
         liked_posts = [user_post_like.post.id for user_post_like in user_post_like]
-
-        print(list(liked_posts))
 
         context = {
             'form': PostForm(),
@@ -50,6 +48,7 @@ def new_post(request):
 def view_post(request, post_pk):
     if request.method == 'GET':
         post = get_object_or_404(Post, pk=post_pk)
+        comments = Comment.objects.filter(post=post).order_by('-created_at')
         liked_post = UserPostLike.objects.filter(post=post, user=request.user)
         is_liked_post = False
 
@@ -57,7 +56,9 @@ def view_post(request, post_pk):
 
         context = {
             'post': post,
-            'liked_post': is_liked_post
+            'liked_post': is_liked_post,
+            'comment_form': CommentForm(),
+            'comments': comments
         }
 
         return render(request, 'wall/view-post-modal.html', context)
@@ -109,3 +110,48 @@ def like_post(request, post_pk):
             }
 
             return JsonResponse({'data':data}, status=200)
+
+@login_required
+def new_comment(request, post_pk):
+    if request.method == 'POST':
+        form = PostForm(request.POST or None)
+
+        # Comment was successfully validated
+        if form.is_valid():
+            # Get commented Post
+            post = get_object_or_404(Post, pk=post_pk)
+
+            # Create Comment object
+            comment = Comment(post=post, text=form['text'].data, created_by=request.user)
+            comment.save()
+
+            post.comments += 1
+            post.save()
+
+            data = {
+                "message": "Comment created successfully",
+                "comments_count": post.comments,
+                "get_comments": reverse("get_wall_post_comments", kwargs={'post_pk':post_pk})
+            }
+
+            return JsonResponse({'data':data}, status=200)
+        else:
+            # Send 400 if comment is invalid
+
+            data = {
+                "error": form.errors
+            }
+
+            return JsonResponse({'data':data}, status=400)
+
+def get_post_comments(request, post_pk):
+    print("get_comments called")
+    if request.method == 'GET':
+        post = get_object_or_404(Post, pk=post_pk)
+        comments = Comment.objects.filter(post=post).order_by('-created_at')
+
+        context = {
+            "comments": comments,
+        }
+
+        return render(request, 'wall/post-comments.html', context)

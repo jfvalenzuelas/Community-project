@@ -1,0 +1,30 @@
+<div class="row">
+    <div class="col-12">
+        <h3>Comments</h3>
+    </div>
+    {% if comments %}
+        <div class="col-12">
+            <ul class="list-group">
+                {% for comment in comments %}
+                    <li class="list-group-item" id="comment-{{ comment.id }}">
+                        <div class="row">
+                            <div class="col-12 font-weight-bold">
+                                {{ comment.created_by }}
+                            </div>
+                            <div class="col-12">
+                                {{ comment.text }}
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted">{{ comment.whenpublished }}</small>
+                            </div>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% else %}
+        <div class="col-12">
+            <p>No comments yet. Be the first!</p>
+        </div>
+    {% endif %}
+</div>

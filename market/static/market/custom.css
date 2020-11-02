@@ -5,6 +5,7 @@
     --green-munsell: #06A77D;
     --ghost-white: #EDEDF4;
     --pure-white: #FFFFFF;
+    --mild-gray: rgba(86,61,124,.1);
 }
 
 body {
@@ -92,10 +93,38 @@ div.card-post > * > button {
     transform: scale(1.3);
 }
 
+.btn-comments:focus {
+    outline: none;
+    box-shadow: none;
+}
+
+.btn-comments {
+    transition: all .2s ease-in-out;
+}
+
+.btn-comments:hover {
+    transition: all .2s ease-in-out;
+    transform: scale(1.3);
+}
+
 .selectable {
     cursor: pointer;
 }
 
 .modal-header {
     padding: 0.1rem 0.5rem;
+}
+
+li.list-group-item {
+    border-radius: 0;
+    border: 0;
+    border-top: 1px solid var(--pure-white);
+}
+
+li.list-group-item:hover {
+    background-color: var(--mild-gray);
+}
+
+textarea {
+    background-color: var(--mild-gray);
 }
