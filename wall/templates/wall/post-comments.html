@@ -8,9 +8,21 @@
                 {% for comment in comments %}
                     <li class="list-group-item" id="comment-{{ comment.id }}">
                         <div class="row">
-                            <div class="col-12 font-weight-bold">
+                            <div class="{% if request.user == comment.created_by %}col-10{% else %}col-12{% endif %} font-weight-bold">
                                 {{ comment.created_by }}
                             </div>
+                            {% if request.user == comment.created_by %}
+                                <div class="col-2 dropdown">
+                                    <button class="btn btn-sm btn-comment-actions float-right" type="button" id="dropdownCommentActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                        <span class="oi oi-ellipses"></span>
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownCommentActionsButton">
+                                        <form>
+                                            <a class="dropdown-item delete-comment-action" action="{% url 'delete_wall_post_comment' comment.id %}">Delete</a>
+                                        </form>
+                                    </div>
+                                </div>
+                            {% endif %}
                             <div class="col-12">
                                 {{ comment.text }}
                             </div>
