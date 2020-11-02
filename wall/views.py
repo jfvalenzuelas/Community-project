@@ -144,8 +144,26 @@ def new_comment(request, post_pk):
 
             return JsonResponse({'data':data}, status=400)
 
+@login_required
+def delete_comment(request, comment_pk):
+    if request.method == 'POST':
+        comment = get_object_or_404(Comment, pk=comment_pk)
+        post = get_object_or_404(Post, pk=comment.post.id)
+
+        comment.delete()
+
+        post.comments -= 1
+        post.save()
+
+        data = {
+            "message": "Comment deleted successfully",
+            "comments_count": post.comments,
+            "get_comments": reverse("get_wall_post_comments", kwargs={'post_pk':post.id})
+        }
+
+        return JsonResponse({'data':data}, status=200)
+
 def get_post_comments(request, post_pk):
-    print("get_comments called")
     if request.method == 'GET':
         post = get_object_or_404(Post, pk=post_pk)
         comments = Comment.objects.filter(post=post).order_by('-created_at')

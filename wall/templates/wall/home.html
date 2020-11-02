@@ -125,7 +125,7 @@
                 })
             });
 
-             $(document).on('click', '#postCommentBtn', function(e) {
+            $(document).on('click', '#postCommentBtn', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
                 var productForm = document.querySelector('#new_comment_form');
@@ -141,6 +141,7 @@
                     success: function (response) {
                         $('#post_info_toolbar').find('.btn-comments').html('<span class="oi oi-comment-square"></span> ' + response.data.comments_count);
                         get_comments_url = response.data.get_comments;
+
                         $.ajax({
                             type: 'GET',
                             url: get_comments_url,
@@ -168,6 +169,41 @@
                         });
                     }
                 });
+            });
+
+            $(document).on('click', '.delete-comment-action', function(e) {
+                url = $(e.target).attr('action');
+
+                $.ajax({
+                    type: 'POST',
+                    url: url,
+                    headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        $('#post_info_toolbar').find('.btn-comments').html('<span class="oi oi-comment-square"></span> ' + response.data.comments_count);
+                        get_comments_url = response.data.get_comments;
+
+                        $.ajax({
+                            type: 'GET',
+                            url: get_comments_url,
+                            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                $('#postCommentsSection').html(response);
+                            },
+                            error: function(xhr, errmsg, err) {
+                                console.log(xhr);
+                            }
+                        })
+                    },
+                    error: function(xhr, errmsg, err) {
+                        console.log(xhr);
+                    }
+                })
             });
         });
     </script>
