@@ -35,6 +35,10 @@
                                 <span class="oi oi-heart"></span>
                                 {{ post.likes }}
                             </button>
+                            <button type="button" class="btn btn-comments" action="{% url 'view_wall_post' post.id %}">
+                                <span class="oi oi-comment-square"></span>
+                                {{ post.comments }}
+                            </button>
                             <small class="float-right text-muted">{{ post.whenpublished }}</small>
                         </div>
                     </div>
@@ -52,6 +56,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             $(document).on('click', '#postItBtn', function(e) {
                 e.preventDefault();
+                e.stopPropagation();
                 var productForm = document.querySelector('#new_post_form');
                 var formData = new FormData(productForm);
 
@@ -102,8 +107,7 @@
             });
 
             $(document).on('click', '.btn-like', function(e) {
-                console.log("like clicked");
-                console.log($(e.target));
+                e.preventDefault();
                 e.stopPropagation();
                 $.ajax({
                     type: 'POST',
@@ -119,6 +123,51 @@
 
                     },
                 })
+            });
+
+             $(document).on('click', '#postCommentBtn', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                var productForm = document.querySelector('#new_comment_form');
+                var formData = new FormData(productForm);
+                $.ajax({
+                    type: 'POST',
+                    url: $('#new_comment_form').attr('action'),
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    enctype: 'multipart/form-data',
+                    success: function (response) {
+                        $('#post_info_toolbar').find('.btn-comments').html('<span class="oi oi-comment-square"></span> ' + response.data.comments_count);
+                        get_comments_url = response.data.get_comments;
+                        $.ajax({
+                            type: 'GET',
+                            url: get_comments_url,
+                            headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                            cache: false,
+                            processData: false,
+                            contentType: false,
+                            success: function(response) {
+                                $('#postCommentsSection').html(response);
+                            },
+                            error: function(xhr, errmsg, err) {
+                                console.log(xhr);
+                            }
+                        })
+                    },
+                    error: function (xhr, errmsg, err) {
+                        var errors = xhr.responseJSON.data.error;
+
+                        Object.keys(errors).forEach(field => {
+                            var fieldElement = $('[name="' + field + '"]');
+                            fieldElement.change();
+                            fieldElement.addClass('is-invalid');
+                            //$(fieldElement.siblings("small")[0]).hide();
+                            fieldElement.after("<small class='form-text text-danger'>" + errors[field] + "</small>");
+                        });
+                    }
+                });
             });
         });
     </script>

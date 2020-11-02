@@ -1,3 +1,5 @@
+{% load widget_tweaks %}
+
 <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
         <div class="modal-header">
@@ -6,28 +8,60 @@
             </button>
         </div>
         <div class="modal-body" id="viewPostModalBody">
-            <h3>{{ post.created_by }}</h3>
-            <p>{{ post.text }}</p>
-        </div>
-        <div class="modal-footer">
-            <button type="button" class="btn btn-like {% if liked_post %}liked{% endif %} mr-auto" action="{% url 'like_wall_post' post.id %}">
-                <span class="oi oi-heart"></span>
-                {{ post.likes }}
-            </button>
-            <small>{{ post.whenpublished }}</small>
-            {% if post.created_by == request.user %}
-                <div class="dropdown">
-                    <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownPostActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Actions
-                    </button>
-                    <div class="dropdown-menu" aria-labelledby="dropdownPostActionsButton">
-                        <form action="{% url 'delete_wall_post' post.id %}" method="POST">
-                            {% csrf_token %}
-                            <a class="dropdown-item" href="javascript:;" onclick="parentNode.submit();">Delete</a>
-                        </form>
-                    </div>
+            <div class="row">
+                <div class="col-12">
+                    <h3>{{ post.created_by }}</h3>
                 </div>
-            {% endif %}
+                <div class="col-12">
+                    <p>{{ post.text }}</p>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <div class="btn-toolbar mr-auto" role="toolbar" id="post_info_toolbar">
+                        <button type="button" class="btn btn-like {% if liked_post %}liked{% endif %}" action="{% url 'like_wall_post' post.id %}">
+                            <span class="oi oi-heart"></span>
+                            {{ post.likes }}
+                        </button>
+                        <button type="button" class="btn btn-comments">
+                            <span class="oi oi-comment-square"></span>
+                            {{ post.comments }}
+                        </button>
+                        <small class="ml-auto">{{ post.whenpublished }}</small>
+                    </div>
+                    {% if post.created_by == request.user %}
+                        <div class="dropdown">
+                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownPostActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                Actions
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownPostActionsButton">
+                                <form action="{% url 'delete_wall_post' post.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <a class="dropdown-item" href="javascript:;" onclick="parentNode.submit();">Delete</a>
+                                </form>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-12">
+                    <form id="new_comment_form" action="{% url 'new_wall_comment' post.id %}">
+                        {% csrf_token %}
+                        {% for field in comment_form %}
+                            {{ field|add_class:"form-control" }}
+                        {% endfor %}
+                        <div class="btn-toolbar mt-3 float-right" role="toolbar" aria-label="New Comment Actions">
+                            <button type="button" class="btn btn-primary btn-sm" id="postCommentBtn">
+                                Comment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <div class="container" id="postCommentsSection">
+                {% include 'wall/post-comments.html' %}
+            </div>
         </div>
     </div>
 </div>
