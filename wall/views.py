@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
+from django_ajax.decorators import ajax
 from .models import Post, UserPostLike, Comment
 from .forms import PostForm, CommentForm
 
@@ -10,8 +11,13 @@ def home(request):
     if request.method == 'GET':
 
         posts = Post.objects.all().order_by('-created_at')
-        user_post_like = UserPostLike.objects.filter(user=request.user)
-        liked_posts = [user_post_like.post.id for user_post_like in user_post_like]
+        
+        # If the User is authenticated, search for liked posts
+        if request.user.is_authenticated:
+            user_post_like = UserPostLike.objects.filter(user=request.user)
+            liked_posts = [user_post_like.post.id for user_post_like in user_post_like]
+        else: # If the User is not authenticated, send an empty array
+            liked_posts = []
 
         context = {
             'form': PostForm(),
@@ -49,7 +55,14 @@ def view_post(request, post_pk):
     if request.method == 'GET':
         post = get_object_or_404(Post, pk=post_pk)
         comments = Comment.objects.filter(post=post).order_by('-created_at')
-        liked_post = UserPostLike.objects.filter(post=post, user=request.user)
+
+         # If the User is authenticated, search for liked posts
+        if request.user.is_authenticated:
+            liked_post = UserPostLike.objects.filter(post=post, user=request.user)
+        else: # If the User is not authenticated, send an empty array
+            liked_post = None
+            liked_posts = []
+
         is_liked_post = False
 
         if (liked_post): is_liked_post = True
@@ -71,7 +84,8 @@ def delete_post(request, post_pk):
 
         return redirect('wall_home')
 
-@login_required
+@ajax
+@login_required(redirect_field_name=None)
 def like_post(request, post_pk):
     if request.method == 'POST':
         # Get liked Post
@@ -93,7 +107,7 @@ def like_post(request, post_pk):
                 "likes": post.likes
             }
 
-            return JsonResponse({'data': data}, status=200)
+            return JsonResponse(data, status=200)
 
         else:
             # Create a new UserPostLike object
@@ -109,7 +123,7 @@ def like_post(request, post_pk):
                 "likes": post.likes
             }
 
-            return JsonResponse({'data':data}, status=200)
+            return JsonResponse(data, status=200)
 
 @login_required
 def new_comment(request, post_pk):

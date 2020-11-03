@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'community_main',
     'market',
     'wall',
+    'django_ajax',
     'django_cleanup.apps.CleanupConfig', # This app needs to be at the bottom of the array
 ]
 

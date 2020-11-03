@@ -116,11 +116,26 @@
                     cache: false,
                     processData: false,
                     success: function(response) {
-                        $(e.target).toggleClass("liked");
-                        $(e.target).html('<span class="oi oi-heart"></span> ' + response.data.likes);
+                        console.log("RESPONSE");
+                        console.log(response);
+                        switch(response.status) {
+                            case 200:
+                                // Refresh HTML for the like button
+                                const data = JSON.parse(response.content);
+                                $(e.target).toggleClass("liked");
+                                $(e.target).html('<span class="oi oi-heart"></span> ' + data.likes);
+                                break;
+                            case 302:
+                                // Redirect to login and then take user to current location
+                                window.location = response.content.concat("?next=".concat(window.location.pathname));
+                                break;
+
+                            default:
+                                break;
+                        }
                     },
                     error: function(xhr, errmsg, err) {
-
+                        console.log(xhr);
                     },
                 })
             });
