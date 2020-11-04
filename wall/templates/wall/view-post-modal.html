@@ -9,9 +9,24 @@
         </div>
         <div class="modal-body" id="viewPostModalBody">
             <div class="row">
-                <div class="col-12">
+                <div class="{% if post.created_by == request.user %}col-10{% else %}col-12{% endif %}">
                     <h3>{{ post.created_by }}</h3>
                 </div>
+                {% if post.created_by == request.user %}
+                    <div class="col-2">
+                        <div class="dropdown float-right">
+                            <button class="btn btn-sm" type="button" id="dropdownPostActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <span class="oi oi-ellipses"></span>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownPostActionsButton">
+                                <form action="{% url 'delete_wall_post' post.id %}" method="POST">
+                                    {% csrf_token %}
+                                    <a class="dropdown-item" href="javascript:;" onclick="parentNode.submit();">Delete</a>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
                 <div class="col-12">
                     <p>{{ post.text }}</p>
                 </div>
@@ -29,19 +44,6 @@
                         </button>
                         <small class="ml-auto">{{ post.whenpublished }}</small>
                     </div>
-                    {% if post.created_by == request.user %}
-                        <div class="dropdown">
-                            <button class="btn btn-primary btn-sm dropdown-toggle" type="button" id="dropdownPostActionsButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                Actions
-                            </button>
-                            <div class="dropdown-menu" aria-labelledby="dropdownPostActionsButton">
-                                <form action="{% url 'delete_wall_post' post.id %}" method="POST">
-                                    {% csrf_token %}
-                                    <a class="dropdown-item" href="javascript:;" onclick="parentNode.submit();">Delete</a>
-                                </form>
-                            </div>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
             <div class="row">
