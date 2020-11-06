@@ -24,7 +24,7 @@ class Product(models.Model):
 
 class Image(models.Model):
     product = models.ForeignKey(Product, default=None, on_delete=models.CASCADE)
-    image = models.FileField(upload_to='images/')
+    image = models.FileField(upload_to='market/images/')
     default = models.BooleanField(default=False)
     width = models.FloatField(default=100)
     length = models.FloatField(default=100)
