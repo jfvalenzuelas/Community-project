@@ -1,10 +1,15 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.http import JsonResponse
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from .forms import UserForm, UserProfileForm, UserProfilePictureForm
+from .models import Profile
 from market.models import Product, Image, Category
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
+from django_ajax.decorators import ajax
+from django.core import serializers
 
 # Create your views here.
 def home(request):
@@ -23,6 +28,9 @@ def signup_user(request):
             user = User.objects.create_user(request.POST['username'], password=request.POST['password1'])
             try:
                 user.save()
+                profile = Profile(user=request.user)
+                profile.save()
+
                 login(request, user)
                 return redirect('community_home')
             except IntegrityError:
@@ -65,6 +73,18 @@ def logout_user(request):
 @login_required
 def profile(request):
     if request.method == 'GET':
+        userFormContext = {
+            'first_name': request.user.first_name,
+            'last_name': request.user.last_name,
+            'email': request.user.email,
+        }
+
+        profile = get_object_or_404(Profile, user=request.user)
+
+        profileFormContext = {
+            'birth_date': profile.birth_date
+        }
+
         products_list = []
         products = Product.objects.filter(created_by=request.user)
         for product in products:
@@ -75,4 +95,87 @@ def profile(request):
             }
             products_list.append(product_data)
 
-        return render(request, 'community_main/profile.html', {'user': request.user, 'products_list': products_list})
+        return render(request, 'community_main/profile.html', {
+            'user': request.user, 
+            'profile': profile, 
+            'products_list': products_list,
+            'user_form': UserForm(userFormContext),
+            'profile_form': UserProfileForm(profileFormContext),
+        })
+
+@ajax
+@login_required
+def update_profile(request):
+    if request.method == 'POST':
+        userFormInfo = {
+            'first_name': request.POST['first_name'],
+            'last_name': request.POST['last_name'],
+            'email': request.POST['email']
+        }
+
+        userProfileInfo = {
+            'birth_date': request.POST['birth_date']
+        }
+
+        userForm = UserForm(userFormInfo, instance=request.user)
+
+        userProfile = get_object_or_404(Profile, user=request.user)
+
+        userProfileForm = UserProfileForm(userProfileInfo, instance=userProfile)
+
+        if userForm.is_valid():
+            if userProfileForm.is_valid():
+                userForm.save()
+                userProfileForm.save()
+                data = {
+                    "message": "Profile information updated successfully."
+                }
+
+                return JsonResponse(data, status=200)
+            else:
+                data = {
+                    "error": {
+                        "user_form": userForm.errors,
+                        "profile_form": userProfileForm.errors
+                    }
+                }
+
+                return JsonResponse(data, status=400)
+        else:
+            data = {
+                "error": {
+                    "user_form": userForm.errors,
+                    "profile_form": userProfileForm.errors
+                }
+            }
+
+            return JsonResponse(data, status=400)
+
+@ajax
+@login_required
+def update_profile_picture(request):
+    if request.method == 'POST':
+        userProfile = get_object_or_404(Profile, user=request.user)
+
+        profilePictureForm = UserProfilePictureForm(request.POST or None, request.FILES or None, instance=userProfile)
+
+        if profilePictureForm.is_valid():
+            profilePictureForm.save()
+            
+            data = {
+                "message": "Profile picture updated successfully.",
+                "data": {
+                    "picture_url": userProfile.picture.url
+                },
+            }
+
+            return JsonResponse(data, status=200)
+        else:
+            data = {
+                "error": {
+                    "message": "Profile picture could not be updated.",
+                    "form_error": profilePictureForm.errors
+                }
+            }
+        
+            return JsonResponse(data, status=400)

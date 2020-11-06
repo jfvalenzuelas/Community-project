@@ -1,9 +1,53 @@
 {% extends 'community_main/base.html' %}
+{% load static %}
+{% load widget_tweaks %}
 {% block content %}
 <h1>Profile</h1>
 <div class="row mt-3 mb-3">
+    <div class="col-12 text-center">
+        <form class="invisible" id="profilePictureForm">
+            <input id="profilePictureFileInput" type="file" name="picture" class="invisible"/>
+        </form>
+        <button type="button" id="profilePictureBtn" class="btn btn-profile-avatar selectable">
+            {% if profile.picture %}
+                <img src="{{ profile.picture.url }}" class="profile-avatar" id="profileAvatar">
+            {% else %}
+                <img src="{% static 'community_main/images/profile/default-profile-picture-2.jpg' %}" class="profile-avatar" id="profileAvatar">
+            {% endif %}
+        </button>
+    </div>
+    <div class="col-12 mt-3 mb-3 text-center">
+        <h3>{{ user.username }}</h3>
+    </div>
+</div>
+<form id="profileInfoForm" method="POST">
+    {% csrf_token %}
+    {% for user_form_field in user_form %}
+        <div class="row mb-3">
+            <div class="col-2">
+                {{ user_form_field.label_tag }}
+            </div>
+            <div class="col-10">
+                {{ user_form_field|add_class:"form-control" }}
+            </div>
+        </div>
+    {% endfor %}
+    {% for profile_form_field in profile_form %}
+        <div class="row mb-3">
+            <div class="col-2">
+                {{ profile_form_field.label_tag }}
+            </div>
+            <div class="col-10">
+                {{ profile_form_field|add_class:"form-control" }}
+            </div>
+        </div>
+    {% endfor %}
+</form>
+<div class="row">
     <div class="col-12">
-        {{ user.username }}
+        <button type="button" class="btn btn-primary float-right" id="saveProfileInformationBtn">
+            Save
+        </button>
     </div>
 </div>
 <div class="row">
@@ -62,7 +106,117 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const csrf = $('[name=csrfmiddlewaretoken]');
+        // Disable the profile information save button at first
+        $('#saveProfileInformationBtn').prop('disabled', true);
+
+        // If any input element of the profile information form changes, enable save button
+        $('#profileInfoForm').on('input change', function() {
+            $('#saveProfileInformationBtn').prop('disabled', false);
+        });
+
+        $(document).on('click', '#profilePictureBtn', function() {
+            $('#profilePictureFileInput').trigger('click');
+        });
+
+        $('#profilePictureFileInput').on('change', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+
+            var formData = new FormData(document.querySelector('#profilePictureForm'));
+
+            $.ajax({
+                type: 'POST',
+                url: '{% url "community_update_profile_picture" %}',
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                success: function(response) {
+                    const content = JSON.parse(response.content);
+                    const profileAvatarElement = $('#profileAvatar');
+
+                    switch (response.status) {
+                        case 200:
+                            var newPictureUrl = content.data.picture_url
+                            profileAvatarElement.attr('src', newPictureUrl);
+                            $('#profile-avatar-error').remove();
+                            profileAvatarElement.parent().after("<small class='form-text text-success' id='profile-avatar-success'>" + content.message + " <span class='oi oi-check'></span></small>");
+                            setTimeout(function() {
+                                $('#profile-avatar-success').remove();
+                            }, 5000);
+                            break;
+                        case 400:
+                            if ($('#profile-avatar-error').length) {
+                                $('#profile-avatar-error').html(content.error.form_error.picture);
+                            } else {
+                                profileAvatarElement.parent().after("<small class='form-text text-danger' id='profile-avatar-error'>" + content.error.form_error.picture + " <span class='oi oi-warning'></span></small>");
+                            }
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        });           
+        
+        $(document).on('click', '#saveProfileInformationBtn', function(e) {
+            e.preventDefault();
+            var userProfileInformationForm = document.querySelector('#profileInfoForm');
+            var formData = new FormData(userProfileInformationForm);
+            $.ajax({
+                type: 'POST',
+                url: '{% url "community_update_profile" %}',
+                data: formData,
+                cache: false,
+                processData: false,
+                contentType: false,
+                enctype: 'multipart/form-data',
+                success: function (response) { 
+                    const data = JSON.parse(response.content);
+                    switch (response.status) {
+                        case 200:
+                            $('#saveProfileInformationBtn').prop('disabled', true);
+                            var invalidInputElements = userProfileInformationForm.querySelectorAll(".is-invalid");
+
+                            invalidInputElements.forEach(function(element) {
+                                $(element).toggleClass('is-invalid', false);
+                                $($(element).siblings("small")[0]).remove();
+                            });
+
+                            $(userProfileInformationForm).after("<div class='row mb-3' id='profile-information-success'><div class='col-12'><small class='form-text text-success float-right'>" + data.message + " <span class='oi oi-check'></span></small></div></div>");
+                            setTimeout(function() {
+                                $('#profile-information-success').remove();
+                            }, 5000);
+
+                            break;
+                        case 400:
+                            Object.keys(data.error.user_form).forEach(field => {
+                                var fieldElement = $('[name="' + field + '"]');
+                                fieldElement.toggleClass('is-invalid', true);
+                                $(fieldElement.siblings("small")[0]).hide();
+                                fieldElement.after("<small class='form-text text-danger'>" + data.error.user_form[field] + "</small>");
+                            });
+                            break;
+                        case 500:
+                            break;
+                    }
+                },
+                error: function (xhr, errmsg, err) {
+                    console.log(xhr);
+                    /**var errors = xhr.responseJSON.error;
+
+                    Object.keys(errors).forEach(field => {
+                        var fieldElement = $('[name="' + field + '"]');
+                        fieldElement.change();
+                        fieldElement.addClass('is-invalid');
+                        $(fieldElement.siblings("small")[0]).hide();
+                        fieldElement.after("<small class='form-text text-danger'>" + errors[field] + "</small>");
+                    });**/
+                }
+            })
+        });
 
         $(document).on('click', '#soldBtn', function(e) {
             e.preventDefault();

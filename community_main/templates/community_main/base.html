@@ -16,19 +16,19 @@
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Roboto&display=swap" rel="stylesheet">
 
-    <link rel="stylesheet" href="{% static 'market/custom.css' %}">
+    <link rel="stylesheet" href="{% static 'community_main/css/custom.css' %}">
 
     <link href="https://fonts.googleapis.com/css2?family=Montserrat&family=Roboto&display=swap" rel="stylesheet">
 
-    <link href="{% static 'market/font/css/open-iconic-bootstrap.css' %}" rel="stylesheet">
+    <link href="{% static 'community_main/css/open-iconic-bootstrap.css' %}" rel="stylesheet">
 
-    <link rel="icon" type="image/png" href="{% static 'market/community-logo.png' %}">
+    <link rel="icon" type="image/png" href="{% static 'community_main/images/community-logo.png' %}">
   </head>
   <body>
     <nav class="navbar navbar-expand-md navbar-custom">
       <div class="container">
         <a class="navbar-brand" href="{% url 'community_home' %}">
-          <img src="{% static 'market/community-logo.png' %}" width="60" height="50" class="d-inline-block align-top">
+          <img src="{% static 'community_main/images/community-logo.png' %}" width="60" height="50" class="d-inline-block align-top">
         </a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -47,7 +47,7 @@
           <ul class="navbar-nav ml-auto">
             {% if user.is_authenticated %}
               <li class="nav-item">
-                <a class="nav-link" href="{% url 'community_profile' %}">{{ user.username }}</a>
+                <a class="nav-link" href="{% url 'community_profile' %}">Profile</a>
               </li>
               <li class="nav-item">
                 <a href="#" onclick="$('#signOutBtn').click()" class="nav-link">Logout</a>

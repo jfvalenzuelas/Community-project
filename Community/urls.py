@@ -31,7 +31,9 @@ urlpatterns = [
 
     #Community_Main
     path('', community_views.home, name="community_home"),
-    path('profile', community_views.profile, name="community_profile"),
+    path('profile/', community_views.profile, name="community_profile"),
+    path('profile/update', community_views.update_profile, name="community_update_profile"),
+    path('profile/picture/update', community_views.update_profile_picture, name="community_update_profile_picture"),
 
     #Market
     path('market/', market_views.home, name="market_home"),
