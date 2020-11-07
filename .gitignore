@@ -20,3 +20,5 @@ community_main/migrations/
 wall/__pycache__/
 
 wall/migrations/
+
+media/community_main/images/profiles/

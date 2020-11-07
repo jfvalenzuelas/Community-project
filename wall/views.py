@@ -11,20 +11,7 @@ from .forms import PostForm, CommentForm
 # Create your views here.
 def home(request):
     if request.method == 'GET':
-
-        posts = []
-        all_posts = Post.objects.all().order_by('-created_at')
-        for post in all_posts:
-            post_user = User.objects.filter(pk=post.created_by.id)
-            user_profile = Profile.objects.filter(user=post_user[0].pk)
-
-            post_info = {
-                "post": post,
-                "user": post_user[0],
-                "profile": user_profile[0]
-            }
-
-            posts.append(post_info)
+        posts = Post.objects.all().order_by('-created_at')
         
         # If the User is authenticated, search for liked posts
         if request.user.is_authenticated:

@@ -2,15 +2,20 @@
 {% load static %}
 {% load widget_tweaks %}
 {% block content %}
-<h1>Profile</h1>
+
+<div class="row mt-3">
+    <div class="col-12 text-center">
+        <h1 class="font-weight-bold">Profile</h1>
+    </div>
+</div>
 <div class="row mt-3 mb-3">
     <div class="col-12 text-center">
         <form class="invisible" id="profilePictureForm">
             <input id="profilePictureFileInput" type="file" name="picture" class="invisible"/>
         </form>
         <button type="button" id="profilePictureBtn" class="btn btn-profile-avatar selectable">
-            {% if profile.picture %}
-                <img src="{{ profile.picture.url }}" class="profile-avatar" id="profileAvatar">
+            {% if user.profile.picture %}
+                <img src="{{ user.profile.picture.url }}" class="profile-avatar" id="profileAvatar">
             {% else %}
                 <img src="{% static 'community_main/images/profile/default-profile-picture-2.jpg' %}" class="profile-avatar" id="profileAvatar">
             {% endif %}
@@ -50,18 +55,21 @@
         </button>
     </div>
 </div>
-<div class="row">
-    <div class="col-12">
-        <h2>Published Products</h2>
+
+<!-- Published Products Section - START -->
+<div class="row mt-3">
+    <div class="col-12 mb-3 text-center">
+        <h2 class="font-weight-bold">Market</h2>
     </div>
-</div>
-<div class="row">
     <div class="col-12">
-        <ul>
+        <h3>Your Published Products</h3>
+    </div>
+    <div class="col-12">
+        <ul class="p-0">
             {% if products_list %}
-                <hr>
                 {% for product_data in products_list %}
-                    <div class="row">
+                    <hr>
+                    <div class="row px-3">
                         <div class="col-8">    
                             <div class="media">
                                 <div class="media-left media-middle">
@@ -94,15 +102,70 @@
                                 </form>
                             </div>
                         </div>
-                        <hr>
                     </div>
                 {% endfor %}
+                <hr>
             {% else %}
                 <span>You have nothing currently on sale :(</span>
             {% endif %}
         </ul>
     </div>
 </div>
+<!-- Published Products Section - END -->
+
+<!-- Published Posts Section - START -->
+<div class="row mt-3">
+    <div class="col-12 mb-3 text-center">
+        <h2 class="font-weight-bold">Wall</h2>
+    </div>
+    <div class="col-12">
+        <h3>Your Published Posts</h3>
+    </div>
+    <div class="col-12">
+        <div class="col-12">
+            {% if posts %}
+                <br>
+                {% for post in posts %}
+                    <div class="card border-0 shadow mb-4 selectable card-post" action="{% url 'view_wall_post' post.id %}">
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-1">
+                                    {% if post.created_by.profile.picture %}
+                                        <img src="{{ post.created_by.profile.picture.url }}" class="post-avatar">
+                                    {% else %}
+                                        <img src="{% static 'community_main/images/profile/default-profile-picture-2.jpg' %}" class="post-avatar">
+                                    {% endif %}
+                                </div>
+                                <div class="col-11">
+                                    <div class="ml-5">
+                                        <h3>{{ post.created_by }}</h3>
+                                        <p>{{ post.text }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr>
+                            <button type="button" class="btn btn-like {% if post.id in liked_posts %}liked{% endif %}" action="{% url 'like_wall_post' post.id %}">
+                                <span class="oi oi-heart"></span>
+                                {{ post.likes }}
+                            </button>
+                            <button type="button" class="btn btn-comments" action="{% url 'view_wall_post' post.id %}">
+                                <span class="oi oi-comment-square"></span>
+                                {{ post.comments }}
+                            </button>
+                            <small class="float-right text-muted">{{ post.whenpublished }}</small>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <p>You have not posted yet :(</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="viewPostModal" tabindex="-1" role="dialog" aria-labelledby="viewPostModal" aria-hidden="true">
+</div>
+<!-- Published Posts Section - END -->
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
@@ -243,6 +306,92 @@
                     console.log("error");
                 }
             });
+        });
+
+         $(document).on('click', 'div.card-post', function(e) {    
+            $.ajax({
+                type: 'GET',
+                url: $(e.target).attr('action'),
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                cache: false,
+                processData: false,
+                beforeSend: function() {
+                    $('#viewPostModal').modal('show');
+                },
+                success: function(response) {
+                    $('#viewPostModal').html(response);
+                },
+                error: function(xhr, errmsg, err) {
+                    console.log(xhr);
+                }
+            });
+        });
+
+        $(document).on('click', '.btn-like', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            $.ajax({
+                type: 'POST',
+                url: $(e.target).attr('action'),
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                cache: false,
+                processData: false,
+                success: function(response) {
+                    switch(response.status) {
+                        case 200:
+                            // Refresh HTML for the like button
+                            const data = JSON.parse(response.content);
+                            $(e.target).toggleClass("liked");
+                            $(e.target).html('<span class="oi oi-heart"></span> ' + data.likes);
+                            break;
+                        case 302:
+                            // Redirect to login and then take user to current location
+                            window.location = response.content.concat("?next=".concat(window.location.pathname));
+                            break;
+
+                        default:
+                            break;
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    console.log(xhr);
+                },
+            })
+        });
+
+        $(document).on('click', '.delete-comment-action', function(e) {
+            url = $(e.target).attr('action');
+
+            $.ajax({
+                type: 'POST',
+                url: url,
+                headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                cache: false,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#post_info_toolbar').find('.btn-comments').html('<span class="oi oi-comment-square"></span> ' + response.data.comments_count);
+                    get_comments_url = response.data.get_comments;
+
+                    $.ajax({
+                        type: 'GET',
+                        url: get_comments_url,
+                        headers: {'X-CSRFToken': '{{ csrf_token }}'},
+                        cache: false,
+                        processData: false,
+                        contentType: false,
+                        success: function(response) {
+                            $('#postCommentsSection').html(response);
+                        },
+                        error: function(xhr, errmsg, err) {
+                            console.log(xhr);
+                        }
+                    })
+                },
+                error: function(xhr, errmsg, err) {
+                    console.log(xhr);
+                }
+            })
         });
 
     });

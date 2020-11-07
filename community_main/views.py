@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from .forms import UserForm, UserProfileForm, UserProfilePictureForm
 from .models import Profile
 from market.models import Product, Image, Category
+from wall.models import Post, UserPostLike
 from django.contrib.auth.models import User
 from django.db import IntegrityError
 from django.contrib.auth import login, logout, authenticate
@@ -95,10 +96,20 @@ def profile(request):
             }
             products_list.append(product_data)
 
+        posts = Post.objects.filter(created_by=request.user).order_by('-created_at')
+
+         # If the User is authenticated, search for liked posts
+        if request.user.is_authenticated:
+            user_post_likes = UserPostLike.objects.filter(user=request.user, post__in=posts)
+            liked_posts = [user_post_like.post.id for user_post_like in user_post_likes]
+        else: # If the User is not authenticated, send an empty array
+            liked_posts = []
+
         return render(request, 'community_main/profile.html', {
-            'user': request.user, 
-            'profile': profile, 
+            'user': request.user,
             'products_list': products_list,
+            'posts': posts,
+            'liked_posts': liked_posts,
             'user_form': UserForm(userFormContext),
             'profile_form': UserProfileForm(profileFormContext),
         })
