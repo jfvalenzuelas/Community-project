@@ -6,4 +6,5 @@ class Profile(models.Model):
     picture = models.ImageField(upload_to='community_main/images/profiles/', height_field="width", width_field="height", null=True, blank=True)
     width = models.IntegerField(blank=True, null=True)
     height = models.IntegerField(blank=True, null=True)
+    avatar = models.ImageField(upload_to='community_main/images/avatars/', null=True, blank=True)
     birth_date = models.DateField(null=True, blank=True)
